@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
     <TextView
-        android:text="@string/crime_title_label"
+        style="?android:listSeparatorTextViewStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        style="?android:listSeparatorTextViewStyle" />
+        android:text="@string/crime_title_label" />
 
     <EditText
         android:id="@+id/crime_title"
@@ -20,9 +20,9 @@
 
     <TextView
         style="?android:listSeparatorTextViewStyle"
-        android:text="@string/crime_details_label"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:text="@string/crime_details_label" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -36,7 +36,15 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            tools:text="WEDNESDAY 16.01.2018 18:01" />
+            tools:text="WEDNESDAY 16.01.2018" />
+
+        <Button
+            android:id="@+id/crime_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="0"
+            android:textAllCaps="false"
+            tools:text="09:49" />
 
         <CheckBox
             android:id="@+id/crime_solved"

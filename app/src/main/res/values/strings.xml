@@ -5,4 +5,6 @@
     <string name="crime_details_label">DETAILS</string>
     <string name="crime_solved_label">Solved</string>
     <string name="date_picker_title">Date of crime</string>
+    <string name="time_picker_title">Crime time</string>
+    <string name="time_button_text">%1$s:%2$s</string>
 </resources>

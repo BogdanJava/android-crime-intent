@@ -1,5 +1,6 @@
 package by.bogdan.criminalintent.model;
 
+import java.util.Calendar;
 import java.util.Date;
 import java.util.UUID;
 
@@ -42,7 +43,32 @@ public class Crime {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj == null || !(obj instanceof Crime)) return false;
-        return this.mId.equals(((Crime) obj).mId);
+        return obj != null && obj instanceof Crime && this.mId.equals(((Crime) obj).mId);
+    }
+
+    public int getHours() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(this.mDate);
+        return calendar.get(Calendar.HOUR);
+    }
+
+    public void setHours(int hours) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(this.mDate);
+        calendar.set(Calendar.HOUR, hours);
+        this.mDate = calendar.getTime();
+    }
+
+    public int getMinutes() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(this.mDate);
+        return calendar.get(Calendar.MINUTE);
+    }
+
+    public void setMinutes(int minutes) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(this.mDate);
+        calendar.set(Calendar.MINUTE, minutes);
+        this.mDate = calendar.getTime();
     }
 }
