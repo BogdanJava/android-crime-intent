@@ -86,9 +86,7 @@ public class CrimeFragment extends Fragment {
                 (buttonView, isChecked) -> mCrime.setSolved(isChecked));
 
         mTitleField.addTextChangedListener((TextChangedWatcher)
-                (charSequence, i, i1, i2) -> {
-                    mCrime.setTitle(charSequence.toString());
-                }
+                (charSequence, i, i1, i2) -> mCrime.setTitle(charSequence.toString())
         );
 
         return view;

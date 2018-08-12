@@ -63,12 +63,9 @@ public class TimePickerFragment extends DialogFragment {
                 .setView(view)
                 .setTitle(R.string.time_picker_title)
                 .setPositiveButton(android.R.string.ok, (dialog, which) -> {
-                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-                        int hour = this.mTimePicker.getHour();
-                        int minute = this.mTimePicker.getMinute();
-
-                        sendResult(RESULT_OK, minute, hour);
-                    }
+                    int hour = this.mTimePicker.getHour();
+                    int minute = this.mTimePicker.getMinute();
+                    sendResult(RESULT_OK, minute, hour);
                 }).create();
 
     }
