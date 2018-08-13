@@ -54,4 +54,5 @@ public class CrimePagerActivity extends AppCompatActivity {
         });
         mViewPager.setCurrentItem(mCrimeLab.getCrimes().indexOf(mCrimeLab.getCrime(crimeId)));
     }
+
 }

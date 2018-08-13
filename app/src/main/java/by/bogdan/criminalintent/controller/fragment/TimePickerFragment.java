@@ -59,6 +59,7 @@ public class TimePickerFragment extends DialogFragment {
         this.mTimePicker = view.findViewById(R.id.dialog_time_time_picker);
         this.mTimePicker.setHour(hours);
         this.mTimePicker.setMinute(minutes);
+        this.mTimePicker.setIs24HourView(true);
         return new AlertDialog.Builder(Objects.requireNonNull(getActivity()))
                 .setView(view)
                 .setTitle(R.string.time_picker_title)

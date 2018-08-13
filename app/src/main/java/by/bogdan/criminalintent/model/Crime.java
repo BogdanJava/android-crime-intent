@@ -71,4 +71,10 @@ public class Crime {
         calendar.set(Calendar.MINUTE, minutes);
         this.mDate = calendar.getTime();
     }
+
+    public Calendar getCalendar() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(this.mDate);
+        return calendar;
+    }
 }

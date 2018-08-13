@@ -8,6 +8,9 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -25,8 +28,13 @@ import by.bogdan.criminalintent.model.Crime;
 import by.bogdan.criminalintent.model.CrimeLab;
 import by.bogdan.criminalintent.utils.TextChangedWatcher;
 
+import static by.bogdan.criminalintent.utils.DateUtils.fixTime;
+import static by.bogdan.criminalintent.utils.DateUtils.get24formatHours;
+
 public class CrimeFragment extends Fragment {
 
+    public static final String EXTRA_CRIME_DELETED =
+            "by.bogdan.criminalintent.crime_deleted";
     private static final String ARG_CRIME_ID = "crime_id";
     private static final String DIALOG_DATE = "DialogDate";
     private static final String DIALOG_TIME = "DialogTime";
@@ -52,6 +60,34 @@ public class CrimeFragment extends Fragment {
         super.onCreate(savedInstanceState);
         UUID crimeId = (UUID) Objects.requireNonNull(getArguments()).getSerializable(ARG_CRIME_ID);
         this.mCrime = CrimeLab.get(getActivity()).getCrime(crimeId);
+        setHasOptionsMenu(true);
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.fragment_crime, menu);
+    }
+
+    private void deleteCrime() {
+        Intent intent = new Intent();
+        intent.putExtra(CrimeFragment.EXTRA_CRIME_DELETED, true);
+        getActivity().setResult(Activity.RESULT_OK, intent);
+
+        getActivity().finish();
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_item_delete_crime: {
+                deleteCrime();
+                return true;
+            }
+            default: {
+                return super.onOptionsItemSelected(item);
+            }
+        }
     }
 
     @Nullable
@@ -66,7 +102,7 @@ public class CrimeFragment extends Fragment {
         mTimeButton.setOnClickListener((View v) -> {
             FragmentManager fragmentManager = getFragmentManager();
             TimePickerFragment dialog = TimePickerFragment.newInstance(this.mCrime.getMinutes(),
-                    this.mCrime.getHours());
+                    get24formatHours(this.mCrime.getDate()));
             dialog.setTargetFragment(CrimeFragment.this, REQUEST_TIME);
             dialog.show(Objects.requireNonNull(fragmentManager), DIALOG_TIME);
         });
@@ -111,7 +147,7 @@ public class CrimeFragment extends Fragment {
                 int hours = data.getIntExtra(TimePickerFragment.EXTRA_HOURS, 0);
                 this.mCrime.setHours(hours);
                 this.mCrime.setMinutes(minutes);
-                break;
+                this.mCrime.setDate(fixTime(hours, this.mCrime.getDate()));
             default:
         }
         this.updateDate();
@@ -119,10 +155,8 @@ public class CrimeFragment extends Fragment {
 
     private void updateDate() {
         this.mDateButton.setText(getFormattedDate(this.mCrime.getDate()));
-        String hoursStr = String.valueOf(this.mCrime.getHours());
-        String minutesStr = String.valueOf(this.mCrime.getMinutes());
-        if (this.mCrime.getHours() < 10) hoursStr = "0" + hoursStr;
-        if (this.mCrime.getMinutes() < 10) minutesStr = "0" + minutesStr;
+        String hoursStr = new SimpleDateFormat("HH", Locale.US).format(this.mCrime.getDate());
+        String minutesStr = new SimpleDateFormat("mm", Locale.US).format(this.mCrime.getDate());
         this.mTimeButton.setText(this.getString(R.string.time_button_text, hoursStr, minutesStr));
     }
 
