@@ -5,12 +5,18 @@ import java.util.Date;
 import java.util.UUID;
 
 public class Crime {
-    private UUID mId = UUID.randomUUID();
+    private UUID mId;
     private String mTitle;
     private Date mDate = new Date();
     private boolean mSolved;
 
     public Crime() {
+        this(UUID.randomUUID());
+    }
+
+    public Crime(UUID uuid) {
+        this.mId = uuid;
+        this.mDate = new Date();
     }
 
     public UUID getId() {

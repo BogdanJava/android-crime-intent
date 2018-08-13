@@ -148,7 +148,6 @@ public class CrimeFragment extends Fragment {
                 this.mCrime.setHours(hours);
                 this.mCrime.setMinutes(minutes);
                 this.mCrime.setDate(fixTime(hours, this.mCrime.getDate()));
-            default:
         }
         this.updateDate();
     }
@@ -160,4 +159,9 @@ public class CrimeFragment extends Fragment {
         this.mTimeButton.setText(this.getString(R.string.time_button_text, hoursStr, minutesStr));
     }
 
+    @Override
+    public void onPause() {
+        super.onPause();
+        CrimeLab.get(getActivity()).update(mCrime);
+    }
 }
