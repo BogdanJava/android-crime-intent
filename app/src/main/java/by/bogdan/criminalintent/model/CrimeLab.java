@@ -2,18 +2,18 @@ package by.bogdan.criminalintent.model;
 
 import android.content.ContentValues;
 import android.content.Context;
-import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 import by.bogdan.criminalintent.dao.CrimeBaseHelper;
+import by.bogdan.criminalintent.dao.CrimeCursorWrapperImpl;
 import by.bogdan.criminalintent.dao.CrimeRepository;
 
 import static by.bogdan.criminalintent.dao.CrimeDbSchema.Columns.DATE;
 import static by.bogdan.criminalintent.dao.CrimeDbSchema.Columns.SOLVED;
+import static by.bogdan.criminalintent.dao.CrimeDbSchema.Columns.SUSPECT;
 import static by.bogdan.criminalintent.dao.CrimeDbSchema.Columns.TITLE;
 import static by.bogdan.criminalintent.dao.CrimeDbSchema.Columns.UUID;
 import static by.bogdan.criminalintent.dao.CrimeDbSchema.CrimeTable.NAME;
@@ -43,15 +43,8 @@ public class CrimeLab implements CrimeRepository {
         contentValues.put(SOLVED, c.isSolved());
         contentValues.put(DATE, c.getDate().getTime());
         contentValues.put(TITLE, c.getTitle());
+        contentValues.put(SUSPECT, c.getSuspect());
         return contentValues;
-    }
-
-    public List<Crime> getCrimes() {
-        return new ArrayList<>();
-    }
-
-    public Crime getCrime(UUID id) {
-        return null;
     }
 
     @Override
@@ -66,7 +59,36 @@ public class CrimeLab implements CrimeRepository {
         mDatabase.update(NAME, contentValues, UUID + " = ?", new String[]{uuid});
     }
 
-    private Cursor queryCrimes(String whereClause, String[] whereArgs) {
-        return mDatabase.query(NAME, null, whereClause, whereArgs, null, null, null);
+    @Override
+    public List<Crime> getAll() {
+        List<Crime> crimes = new ArrayList<>();
+        try (CrimeCursorWrapperImpl cursor = queryCrimes(null, null)) {
+            cursor.moveToFirst();
+            while (!cursor.isAfterLast()) {
+                crimes.add(cursor.getCrime());
+                cursor.moveToNext();
+            }
+        }
+        return crimes;
+    }
+
+    @Override
+    public Crime getByUuid(java.util.UUID uuid) {
+        try (CrimeCursorWrapperImpl cursor = queryCrimes(UUID + " = ?", new String[]{uuid.toString()})) {
+            if (cursor.getCount() == 0) return null;
+            cursor.moveToFirst();
+            return cursor.getCrime();
+        }
+    }
+
+    @Override
+    public boolean delete(java.util.UUID uuid) {
+        return mDatabase.delete(NAME, UUID + " = ?", new String[]{uuid.toString()}) != 0;
+    }
+
+    private CrimeCursorWrapperImpl queryCrimes(String whereClause, String[] whereArgs) {
+        return new CrimeCursorWrapperImpl(
+                mDatabase.query(NAME, null, whereClause, whereArgs, null, null, null)
+        );
     }
 }

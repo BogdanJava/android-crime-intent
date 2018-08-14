@@ -43,16 +43,16 @@ public class CrimePagerActivity extends AppCompatActivity {
         mViewPager.setAdapter(new FragmentStatePagerAdapter(fragmentManager) {
             @Override
             public Fragment getItem(int position) {
-                Crime crime = mCrimeLab.getCrimes().get(position);
+                Crime crime = mCrimeLab.getAll().get(position);
                 return CrimeFragment.newInstance(crime.getId());
             }
 
             @Override
             public int getCount() {
-                return mCrimeLab.getCrimes().size();
+                return mCrimeLab.getAll().size();
             }
         });
-        mViewPager.setCurrentItem(mCrimeLab.getCrimes().indexOf(mCrimeLab.getCrime(crimeId)));
+        mViewPager.setCurrentItem(mCrimeLab.getAll().indexOf(mCrimeLab.getByUuid(crimeId)));
     }
 
 }

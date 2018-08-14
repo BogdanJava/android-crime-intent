@@ -9,6 +9,7 @@ import by.bogdan.criminalintent.model.Crime;
 
 import static by.bogdan.criminalintent.dao.CrimeDbSchema.Columns.DATE;
 import static by.bogdan.criminalintent.dao.CrimeDbSchema.Columns.SOLVED;
+import static by.bogdan.criminalintent.dao.CrimeDbSchema.Columns.SUSPECT;
 import static by.bogdan.criminalintent.dao.CrimeDbSchema.Columns.TITLE;
 import static by.bogdan.criminalintent.dao.CrimeDbSchema.Columns.UUID;
 
@@ -23,11 +24,13 @@ public class CrimeCursorWrapperImpl extends CursorWrapper {
         String title = getString(getColumnIndex(TITLE));
         long date = getLong(getColumnIndex(DATE));
         int isSolved = getInt(getColumnIndex(SOLVED));
+        String suspect = getString(getColumnIndex(SUSPECT));
 
         Crime crime = new Crime(java.util.UUID.fromString(uuidString));
         crime.setTitle(title);
         crime.setDate(new Date(date));
         crime.setSolved(isSolved != 0);
+        crime.setSuspect(suspect);
         return crime;
     }
 

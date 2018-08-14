@@ -6,6 +6,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 import static by.bogdan.criminalintent.dao.CrimeDbSchema.Columns.DATE;
 import static by.bogdan.criminalintent.dao.CrimeDbSchema.Columns.SOLVED;
+import static by.bogdan.criminalintent.dao.CrimeDbSchema.Columns.SUSPECT;
 import static by.bogdan.criminalintent.dao.CrimeDbSchema.Columns.TITLE;
 import static by.bogdan.criminalintent.dao.CrimeDbSchema.Columns.UUID;
 
@@ -24,12 +25,11 @@ public class CrimeBaseHelper extends SQLiteOpenHelper {
                 UUID + ", " +
                 TITLE + ", " +
                 DATE + ", " +
-                SOLVED +
+                SOLVED + ", " +
+                SUSPECT +
                 ")");
     }
 
     @Override
-    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-
-    }
+    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {}
 }

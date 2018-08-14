@@ -22,6 +22,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.List;
+import java.util.UUID;
 
 import by.bogdan.criminalintent.R;
 import by.bogdan.criminalintent.controller.activity.CrimePagerActivity;
@@ -41,7 +42,7 @@ public class CrimeListFragment extends Fragment {
     private Button mAddCrimeButton;
 
     private boolean crimeListNotEmpty() {
-        return CrimeLab.get(getActivity()).getCrimes().size() != 0;
+        return CrimeLab.get(getActivity()).getAll().size() != 0;
     }
 
     @Nullable
@@ -76,7 +77,7 @@ public class CrimeListFragment extends Fragment {
 
     private void updateSubtitle() {
         CrimeLab crimeLab = CrimeLab.get(getActivity());
-        int crimeCount = crimeLab.getCrimes().size();
+        int crimeCount = crimeLab.getAll().size();
         String subtitle = getResources()
                 .getQuantityString(R.plurals.subtitle_plural, crimeCount, crimeCount);
 
@@ -89,11 +90,12 @@ public class CrimeListFragment extends Fragment {
     private void updateUI() {
         changeVisibilities();
         CrimeLab crimeLab = CrimeLab.get(getActivity());
-        List<Crime> crimes = crimeLab.getCrimes();
+        List<Crime> crimes = crimeLab.getAll();
         if (mAdapter == null) {
             this.mAdapter = new CrimeAdapter(crimes);
             this.mCrimeRecyclerView.setAdapter(this.mAdapter);
         } else {
+            this.mAdapter.mCrimes = crimes;
             if (this.mLastClickedCrimePosition != null)
                 this.mAdapter.notifyItemChanged(this.mLastClickedCrimePosition);
         }
@@ -141,10 +143,10 @@ public class CrimeListFragment extends Fragment {
     private void createNewCrimeActions() {
         Crime crime = new Crime();
         CrimeLab crimeLab = CrimeLab.get(getActivity());
-        crimeLab.addCrime(crime);
+        crimeLab.insert(crime);
         Intent intent = CrimePagerActivity.newCrimeIdIntent(getContext(), crime.getId());
         startActivity(intent);
-        this.mLastClickedCrimePosition = crimeLab.getCrimes().size() - 1;
+        this.mLastClickedCrimePosition = crimeLab.getAll().size() - 1;
     }
 
     @Override
@@ -165,11 +167,13 @@ public class CrimeListFragment extends Fragment {
             case REQUEST_DELETE: {
                 boolean crimeDeleted = data.getBooleanExtra(CrimeFragment.EXTRA_CRIME_DELETED, false);
                 if (crimeDeleted) {
+                    UUID deletedId = (UUID) data.getSerializableExtra(CrimeFragment.EXTRA_CRIME_DELETED_ID);
                     CrimeLab crimeLab = CrimeLab.get(getActivity());
-                    Crime removedCrime = crimeLab.getCrimes()
-                            .remove(this.mLastClickedCrimePosition.intValue());
-                    Toast.makeText(getActivity(), "Crime deleted: " + removedCrime.getTitle(),
-                            Toast.LENGTH_SHORT).show();
+                    boolean deleted = crimeLab.delete(deletedId);
+                    if (deleted) {
+                        Toast.makeText(getActivity(), "Crime deleted: " + deletedId,
+                                Toast.LENGTH_SHORT).show();
+                    }
                 }
             }
         }
@@ -191,6 +195,7 @@ public class CrimeListFragment extends Fragment {
             this.mSolvedCheckBox = itemView.findViewById(R.id.list_item_crime_solved_check_box);
             this.mSolvedCheckBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
                 this.mCrime.setSolved(isChecked);
+                CrimeLab.get(getActivity()).update(this.mCrime);
             });
         }
 
@@ -203,7 +208,7 @@ public class CrimeListFragment extends Fragment {
 
         @Override
         public void onClick(View view) {
-            mLastClickedCrimePosition = CrimeLab.get(getActivity()).getCrimes().indexOf(this.mCrime);
+            mLastClickedCrimePosition = CrimeLab.get(getActivity()).getAll().indexOf(this.mCrime);
             Intent intent = CrimePagerActivity.newCrimeIdIntent(getActivity(), this.mCrime.getId());
             startActivityForResult(intent, REQUEST_DELETE);
         }

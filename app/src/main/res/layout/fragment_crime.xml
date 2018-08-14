@@ -12,6 +12,8 @@
         android:text="@string/crime_title_label" />
 
     <EditText
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
         android:id="@+id/crime_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -25,7 +27,8 @@
         android:text="@string/crime_details_label" />
 
     <LinearLayout
-        android:layout_margin="6dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
         android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
@@ -55,5 +58,21 @@
         android:layout_marginLeft="16dp"
         android:layout_marginRight="16dp"
         android:text="@string/crime_solved_label" />
+
+    <Button
+        android:id="@+id/suspect_button"
+        android:text="@string/crime_suspect_text"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <Button
+        android:id="@+id/report_button"
+        android:text="@string/crime_report_text"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
 
 </LinearLayout>

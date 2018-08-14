@@ -9,6 +9,7 @@ public class Crime {
     private String mTitle;
     private Date mDate = new Date();
     private boolean mSolved;
+    private String mSuspect;
 
     public Crime() {
         this(UUID.randomUUID());
@@ -82,5 +83,13 @@ public class Crime {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(this.mDate);
         return calendar;
+    }
+
+    public String getSuspect() {
+        return mSuspect;
+    }
+
+    public void setSuspect(String suspect) {
+        mSuspect = suspect;
     }
 }
