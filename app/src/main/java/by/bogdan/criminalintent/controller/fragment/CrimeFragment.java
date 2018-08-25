@@ -1,15 +1,19 @@
 package by.bogdan.criminalintent.controller.fragment;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.ShareCompat;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -19,6 +23,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -46,6 +51,7 @@ public class CrimeFragment extends Fragment {
     private static final int REQUEST_DATE = 0;
     private static final int REQUEST_TIME = 1;
     private static final int REQUEST_CONTACT = 2;
+    private static final int REQUEST_CONTACTS_PERMISSIONS = 3;
 
     private Crime mCrime;
     private EditText mTitleField;
@@ -54,6 +60,10 @@ public class CrimeFragment extends Fragment {
     private Button mReportButton;
     private Button mSuspectButton;
     private CheckBox mSolvedCheckBox;
+    private Button mCallSuspectButton;
+    private String mContactPhoneNumber;
+    private boolean hasPermissions;
+    private String mContactId;
 
     public static CrimeFragment newInstance(UUID crimeId) {
         Bundle args = new Bundle();
@@ -104,23 +114,50 @@ public class CrimeFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         final View view = inflater.inflate(R.layout.fragment_crime, container, false);
-        Intent intent = new Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI);
+        Intent selectSuspectIntent = new Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI);
         mSuspectButton = view.findViewById(R.id.suspect_button);
         mSuspectButton.setOnClickListener(button -> {
-            startActivityForResult(intent, REQUEST_CONTACT);
+            startActivityForResult(selectSuspectIntent, REQUEST_CONTACT);
         });
 
         if (mCrime.getSuspect() != null) {
             mSuspectButton.setText(mCrime.getSuspect());
         }
 
+        mCallSuspectButton = view.findViewById(R.id.call_suspect_button);
+        mCallSuspectButton.setOnClickListener(button -> {
+            Intent callSuspectIntent = new Intent(Intent.ACTION_DIAL,
+                    Uri.parse(String.format("tel:%s", this.mContactPhoneNumber)));
+            startActivity(callSuspectIntent);
+        });
+
+        if (mCrime.getSuspect() != null) {
+            this.setContactPhoneNumberByName(mCrime.getSuspect());
+        }
+
+        if (this.mContactPhoneNumber == null || this.mContactPhoneNumber.isEmpty()) {
+            mCallSuspectButton.setEnabled(false);
+        }
+
+        PackageManager packageManager = getActivity().getPackageManager();
+        if (packageManager.resolveActivity(selectSuspectIntent,
+                PackageManager.MATCH_DEFAULT_ONLY) == null) {
+            mSuspectButton.setEnabled(false);
+        }
+
         mReportButton = view.findViewById(R.id.report_button);
         mReportButton.setOnClickListener(button -> {
-            Intent i = new Intent(Intent.ACTION_SEND);
+            /*Intent i = new Intent(Intent.ACTION_SEND);
             i.setType("text/plain");
             i.putExtra(Intent.EXTRA_TEXT, getCrimeReport());
             i.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.crime_report_subject));
-            i = Intent.createChooser(i, getString(R.string.send_report));
+            i = Intent.createChooser(i, getString(R.string.send_report));*/
+            Intent i = ShareCompat.IntentBuilder.from(getActivity())
+                    .setSubject(getString(R.string.crime_report_subject))
+                    .setText(getCrimeReport())
+                    .addEmailTo(getString(R.string.send_report))
+                    .setType("text/plain")
+                    .getIntent();
             startActivity(i);
         });
 
@@ -181,7 +218,9 @@ public class CrimeFragment extends Fragment {
             case REQUEST_CONTACT: {
                 if (data != null) {
                     Uri contactUri = data.getData();
-                    String[] queryFields = {ContactsContract.Contacts.DISPLAY_NAME};
+                    String[] queryFields = {ContactsContract.Contacts.DISPLAY_NAME,
+                            ContactsContract.Contacts._ID
+                    };
                     try (Cursor cursor = getActivity().getContentResolver()
                             .query(contactUri, queryFields, null, null, null)) {
                         if (cursor.getCount() == 0) return;
@@ -189,9 +228,57 @@ public class CrimeFragment extends Fragment {
                         String suspect = cursor.getString(0);
                         mCrime.setSuspect(suspect);
                         mSuspectButton.setText(suspect);
+                        this.mContactId = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts._ID));
+                        setContactPhoneNumberById(this.mContactId);
                     }
                 }
+                break;
             }
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case REQUEST_CONTACTS_PERMISSIONS: {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    this.setContactPhoneNumberById(this.mContactId);
+                } else {
+                    Toast.makeText(getActivity(), "Access denied", Toast.LENGTH_SHORT).show();
+                }
+            }
+        }
+    }
+
+    private void setContactPhoneNumberByName(String contactName) {
+        setContactPhoneNumber(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME, contactName);
+    }
+
+    private void setContactPhoneNumberById(String contactId) {
+        setContactPhoneNumber(ContactsContract.CommonDataKinds.Phone.CONTACT_ID, contactId);
+    }
+
+    private void setContactPhoneNumber(String field, String value) {
+        this.hasPermissions = getActivity().getApplicationContext().checkSelfPermission(Manifest.permission.READ_CONTACTS)
+                == PackageManager.PERMISSION_GRANTED;
+        if (hasPermissions) {
+            try (Cursor cursor = getActivity().getContentResolver().query(
+                    ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
+                    null,
+                    field + " = ?",
+                    new String[]{value}, null)) {
+                if (cursor.getCount() == 0) return;
+                cursor.moveToFirst();
+                String phoneNumber = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
+                if (phoneNumber != null && !phoneNumber.isEmpty()) {
+                    this.mContactPhoneNumber = phoneNumber;
+                    this.mCallSuspectButton.setEnabled(true);
+                }
+            }
+        } else {
+            ActivityCompat.requestPermissions(getActivity(), new String[]{
+                    Manifest.permission.READ_CONTACTS
+            }, REQUEST_CONTACTS_PERMISSIONS);
         }
     }
 
