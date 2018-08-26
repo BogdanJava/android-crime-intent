@@ -85,6 +85,10 @@ public class Crime {
         return calendar;
     }
 
+    public String getPhotoFilename() {
+        return String.format("IMG_%s.jpg", getId().toString());
+    }
+
     public String getSuspect() {
         return mSuspect;
     }

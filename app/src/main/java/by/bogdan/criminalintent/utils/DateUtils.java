@@ -22,4 +22,9 @@ public class DateUtils {
         return calendar.getTime();
     }
 
+    public static String getFormattedDate(Date date) {
+        final SimpleDateFormat df = new SimpleDateFormat("EEEE, MMM dd, yyyy", Locale.US);
+        return df.format(date);
+    }
+
 }
