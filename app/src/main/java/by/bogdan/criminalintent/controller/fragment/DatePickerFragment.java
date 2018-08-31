@@ -30,7 +30,6 @@ public class DatePickerFragment extends DialogFragment {
     private static final String ARG_DATE = "date";
 
     private DatePicker mDatePicker;
-    private Button mOkButton;
 
     public static DatePickerFragment newInstance(Date date) {
         Bundle bundle = new Bundle();
@@ -47,13 +46,6 @@ public class DatePickerFragment extends DialogFragment {
 
         this.getTargetFragment()
                 .onActivityResult(this.getTargetRequestCode(), resultCode, intent);
-    }
-
-    private void hideDatePickerDialog() {
-        FragmentManager fragmentManager = getFragmentManager();
-        Objects.requireNonNull(fragmentManager).beginTransaction()
-                .remove(this)
-                .commit();
     }
 
     @NonNull

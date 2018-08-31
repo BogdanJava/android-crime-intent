@@ -29,6 +29,8 @@
     <string name="crime_report_subject">CriminalIntent Crime Report</string>
     <string name="call_suspect_text">Call suspect</string>
     <string name="image_description">Crime photo</string>
+    <string name="crime_photo">Crime photo</string>
+    <string name="image_dialog_title">Crime image</string>
 
     <plurals name="subtitle_plural">
         <item quantity="one">%1$d crime</item>

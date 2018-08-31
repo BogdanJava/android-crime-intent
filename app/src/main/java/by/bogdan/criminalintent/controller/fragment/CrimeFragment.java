@@ -55,6 +55,7 @@ public class CrimeFragment extends Fragment {
     private static final String ARG_CRIME_ID = "crime_id";
     private static final String DIALOG_DATE = "DialogDate";
     private static final String DIALOG_TIME = "DialogTime";
+    private static final String DIALOG_IMAGE = "DialogImage";
     private static final int REQUEST_DATE = 0;
     private static final int REQUEST_TIME = 1;
     private static final int REQUEST_CONTACT = 2;
@@ -174,6 +175,13 @@ public class CrimeFragment extends Fragment {
         }
 
         mPhotoView = view.findViewById(R.id.crime_photo);
+        mPhotoView.setEnabled(this.mCrime.getPhotoFilename() != null);
+        mPhotoView.setOnClickListener(photoView -> {
+            FragmentManager fragmentManager = getFragmentManager();
+            CrimeImageFragment crimeImageFragment = CrimeImageFragment
+                    .newInstance(mPhotoFile.getPath());
+            crimeImageFragment.show(Objects.requireNonNull(fragmentManager), DIALOG_IMAGE);
+        });
         updatePhotoView();
 
         mReportButton = view.findViewById(R.id.report_button);
@@ -294,10 +302,6 @@ public class CrimeFragment extends Fragment {
     }
 
     private void setContactPhoneNumber(String field, String value) {
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-//            this.hasPermissions = getActivity().getApplicationContext().checkSelfPermission(Manifest.permission.READ_CONTACTS)
-//                    == PackageManager.PERMISSION_GRANTED;
-//        }
         if (hasPermissions) {
             try (Cursor cursor = getActivity().getContentResolver().query(
                     ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
