@@ -22,6 +22,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
@@ -182,7 +183,9 @@ public class CrimeFragment extends Fragment {
                     .newInstance(mPhotoFile.getPath());
             crimeImageFragment.show(Objects.requireNonNull(fragmentManager), DIALOG_IMAGE);
         });
-        updatePhotoView();
+        ViewTreeObserver photoViewTreeObserver = mPhotoView.getViewTreeObserver();
+        photoViewTreeObserver.addOnGlobalLayoutListener(() -> updatePhotoView(mPhotoView));
+        //updatePhotoView();
 
         mReportButton = view.findViewById(R.id.report_button);
         mReportButton.setOnClickListener(button -> {
@@ -218,8 +221,7 @@ public class CrimeFragment extends Fragment {
 
         mSolvedCheckBox = view.findViewById(R.id.crime_solved);
         mSolvedCheckBox.setChecked(mCrime.isSolved());
-        mSolvedCheckBox.setOnCheckedChangeListener(
-                (buttonView, isChecked) -> mCrime.setSolved(isChecked));
+        mSolvedCheckBox.setOnCheckedChangeListener((buttonView, isChecked) -> mCrime.setSolved(isChecked));
 
         mTitleField.addTextChangedListener((TextChangedWatcher)
                 (charSequence, i, i1, i2) -> mCrime.setTitle(charSequence.toString())
@@ -238,6 +240,15 @@ public class CrimeFragment extends Fragment {
         }
     }
 
+    public void updatePhotoView(ImageView imageView) {
+        if (mPhotoFile == null || !mPhotoFile.exists()) {
+            mPhotoView.setImageDrawable(null);
+        } else {
+            Bitmap bitmap = PictureUtils.getScaledBitmap(
+                    mPhotoFile.getPath(), imageView);
+            mPhotoView.setImageBitmap(bitmap);
+        }
+    }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {

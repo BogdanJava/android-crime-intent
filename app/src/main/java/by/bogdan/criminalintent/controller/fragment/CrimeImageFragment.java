@@ -38,7 +38,7 @@ public class CrimeImageFragment extends DialogFragment implements IDialogFragmen
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
         View view = LayoutInflater.from(getActivity()).inflate(R.layout.dialog_photo, null);
-        this.mPhotoPath = Objects.requireNonNull(savedInstanceState).getString(ARG_PHOTO_PATH);
+        this.mPhotoPath = Objects.requireNonNull(getArguments()).getString(ARG_PHOTO_PATH);
         this.mCrimePhoto = view.findViewById(R.id.crime_photo_image_view);
         mCrimePhoto.setImageBitmap(getImageBitmap());
 
@@ -51,8 +51,6 @@ public class CrimeImageFragment extends DialogFragment implements IDialogFragmen
     }
 
     private Bitmap getImageBitmap() {
-        int height = mCrimePhoto.getHeight();
-        int width = mCrimePhoto.getWidth();
-        return PictureUtils.getScaledBitmap(mPhotoPath, width, height);
+        return PictureUtils.getScaledBitmap(mPhotoPath, getActivity());
     }
 }
