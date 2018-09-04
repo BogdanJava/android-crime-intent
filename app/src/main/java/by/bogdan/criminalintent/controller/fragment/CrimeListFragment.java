@@ -1,6 +1,7 @@
 package by.bogdan.criminalintent.controller.fragment;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -25,7 +26,6 @@ import java.util.List;
 import java.util.UUID;
 
 import by.bogdan.criminalintent.R;
-import by.bogdan.criminalintent.controller.activity.CrimePagerActivity;
 import by.bogdan.criminalintent.model.Crime;
 import by.bogdan.criminalintent.model.CrimeLab;
 
@@ -40,6 +40,19 @@ public class CrimeListFragment extends Fragment {
     private LinearLayout mEmptyCrimeListView;
     private boolean mSubtitleVisible;
     private Button mAddCrimeButton;
+    private Callbacks mCallbacks;
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        mCallbacks = (Callbacks) context;
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mCallbacks = null;
+    }
 
     private boolean crimeListNotEmpty() {
         return CrimeLab.get(getActivity()).getAll().size() != 0;
@@ -144,8 +157,7 @@ public class CrimeListFragment extends Fragment {
         Crime crime = new Crime();
         CrimeLab crimeLab = CrimeLab.get(getActivity());
         crimeLab.insert(crime);
-        Intent intent = CrimePagerActivity.newCrimeIdIntent(getContext(), crime.getId());
-        startActivity(intent);
+        mCallbacks.onCrimeSelected(crime);
         this.mLastClickedCrimePosition = crimeLab.getAll().size() - 1;
     }
 
@@ -179,6 +191,16 @@ public class CrimeListFragment extends Fragment {
         }
     }
 
+    /**
+     * An interface that is implemented to provide logic related to filling the fragment
+     * from host activity
+     * <p>
+     * Must be implemented by host activity!
+     */
+    public interface Callbacks {
+        void onCrimeSelected(Crime crime);
+    }
+
     private class CrimeHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
         private Crime mCrime;
@@ -209,8 +231,9 @@ public class CrimeListFragment extends Fragment {
         @Override
         public void onClick(View view) {
             mLastClickedCrimePosition = CrimeLab.get(getActivity()).getAll().indexOf(this.mCrime);
-            Intent intent = CrimePagerActivity.newCrimeIdIntent(getActivity(), this.mCrime.getId());
-            startActivityForResult(intent, REQUEST_DELETE);
+//            Intent intent = CrimePagerActivity.newCrimeIdIntent(getActivity(), this.mCrime.getId());
+//            startActivityForResult(intent, REQUEST_DELETE);
+            mCallbacks.onCrimeSelected(mCrime);
         }
     }
 
