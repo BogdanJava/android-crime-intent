@@ -7,7 +7,8 @@ import by.bogdan.criminalintent.controller.fragment.CrimeFragment;
 import by.bogdan.criminalintent.controller.fragment.CrimeListFragment;
 import by.bogdan.criminalintent.model.Crime;
 
-public class CrimeListActivity extends SingleFragmentActivity implements CrimeListFragment.Callbacks {
+public class CrimeListActivity extends SingleFragmentActivity implements CrimeListFragment.Callbacks,
+        CrimeFragment.Callbacks {
 
     @Override
     protected Fragment createFragment() {
@@ -30,6 +31,17 @@ public class CrimeListActivity extends SingleFragmentActivity implements CrimeLi
             startActivity(
                     CrimePagerActivity.newCrimeIdIntent(this, crime.getId())
             );
+        }
+    }
+
+    @Override
+    public void onCrimeUpdated(Crime crime) {
+        CrimeListFragment listFragment = (CrimeListFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.fragment_container);
+        if (listFragment != null) {
+            listFragment.updateUI();
+        } else {
+            throw new NullPointerException("listFragment is null");
         }
     }
 }

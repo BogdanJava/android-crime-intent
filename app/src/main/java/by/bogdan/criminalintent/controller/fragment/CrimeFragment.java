@@ -2,6 +2,7 @@ package by.bogdan.criminalintent.controller.fragment;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
@@ -78,6 +79,7 @@ public class CrimeFragment extends Fragment {
     private String mContactId;
     private boolean hasPermissions = true;
     private File mPhotoFile;
+    private Callbacks mCallbacks;
 
     public static CrimeFragment newInstance(UUID crimeId) {
         Bundle args = new Bundle();
@@ -185,7 +187,6 @@ public class CrimeFragment extends Fragment {
         });
         ViewTreeObserver photoViewTreeObserver = mPhotoView.getViewTreeObserver();
         photoViewTreeObserver.addOnGlobalLayoutListener(() -> updatePhotoView(mPhotoView));
-        //updatePhotoView();
 
         mReportButton = view.findViewById(R.id.report_button);
         mReportButton.setOnClickListener(button -> {
@@ -221,10 +222,15 @@ public class CrimeFragment extends Fragment {
 
         mSolvedCheckBox = view.findViewById(R.id.crime_solved);
         mSolvedCheckBox.setChecked(mCrime.isSolved());
-        mSolvedCheckBox.setOnCheckedChangeListener((buttonView, isChecked) -> mCrime.setSolved(isChecked));
+        mSolvedCheckBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            mCrime.setSolved(isChecked);
+            updateCrime();
+        });
 
-        mTitleField.addTextChangedListener((TextChangedWatcher)
-                (charSequence, i, i1, i2) -> mCrime.setTitle(charSequence.toString())
+        mTitleField.addTextChangedListener((TextChangedWatcher) (charSequence, i, i1, i2) -> {
+                    mCrime.setTitle(charSequence.toString());
+                    updateCrime();
+                }
         );
 
         return view;
@@ -289,6 +295,7 @@ public class CrimeFragment extends Fragment {
                 break;
             }
         }
+        updateCrime();
     }
 
     @Override
@@ -365,5 +372,31 @@ public class CrimeFragment extends Fragment {
     public void onPause() {
         super.onPause();
         CrimeLab.get(getActivity()).update(mCrime);
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        mCallbacks = (Callbacks) context;
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mCallbacks = null;
+    }
+
+    private void updateCrime() {
+        CrimeLab.get(getActivity()).update(mCrime);
+        mCallbacks.onCrimeUpdated(mCrime);
+    }
+
+    /**
+     * An interface that declares a callback method that's called
+     * when a crime gets updated. It's needed to update the list of crimes
+     * after we perform some changes in a single one
+     */
+    public interface Callbacks {
+        void onCrimeUpdated(Crime crime);
     }
 }

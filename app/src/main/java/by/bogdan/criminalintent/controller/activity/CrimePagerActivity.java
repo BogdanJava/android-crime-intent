@@ -17,7 +17,7 @@ import by.bogdan.criminalintent.controller.fragment.CrimeFragment;
 import by.bogdan.criminalintent.model.Crime;
 import by.bogdan.criminalintent.model.CrimeLab;
 
-public class CrimePagerActivity extends AppCompatActivity {
+public class CrimePagerActivity extends AppCompatActivity implements CrimeFragment.Callbacks {
     private static final String EXTRA_CRIME_ID =
             "by.bogdan.criminalintent.crime_id";
     private ViewPager mViewPager;
@@ -55,4 +55,11 @@ public class CrimePagerActivity extends AppCompatActivity {
         mViewPager.setCurrentItem(mCrimeLab.getAll().indexOf(mCrimeLab.getByUuid(crimeId)));
     }
 
+    /**
+     * Needs to be implemented here because of the architecture (All activities that are hosts for
+     * {@link CrimeFragment} must implement this. In this case it does nothing and should be empty
+     */
+    @Override
+    public void onCrimeUpdated(Crime crime) {
+    }
 }
